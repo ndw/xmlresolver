@@ -16,7 +16,7 @@ import java.net.URISyntaxException;
 /**
  * An extension of the {@link Resolver} that implements Xerces {@link org.apache.xerces.xni.parser.XMLEntityResolver XMLEntityResolver}.
  *
- * <p>This is a separate class so that the depenency on Xerces can remain optional. You must have
+ * <p>This is a separate class so that the dependency on Xerces can remain optional. You must have
  * Xerces on your classpath to load this class, obviously. You must also explicitly configure
  * the underlying {@link org.xml.sax.XMLReader XMLReader} to use this resolver:</p>
  * <pre>xmlReader.setProperty("http://apache.org/xml/properties/internal/entity-resolver", resolver);</pre>
@@ -98,32 +98,43 @@ public class XercesResolver extends Resolver implements org.apache.xerces.xni.pa
         String baseURI = resId.getBaseSystemId();
         String namespace = resId.getNamespace();
 
+        ResourceRequest request = null;
         ResolvedResource rsrc = null;
         // If the namespace isn't null, we've gone past the doctype declaration, so it's not an entity.
         // Otherwise, if publicId or systemId aren't null, try resolving an entity.
         if (namespace == null) {
-            rsrc = resolver.resolveEntity(null, publicId, systemId, baseURI);
-            if (rsrc == null) {
-                rsrc = resolver.resolveEntity(null, publicId, resId.getExpandedSystemId(), baseURI);
+            request = getRequest(systemId, baseURI, ResolverConstants.ANY_NATURE, ResolverConstants.ANY_PURPOSE);
+            request.setPublicId(publicId);
+            rsrc = resolve(request);
+            if (!rsrc.isResolved()) {
+                request = getRequest(resId.getExpandedSystemId(), baseURI, ResolverConstants.ANY_NATURE, ResolverConstants.ANY_PURPOSE);
+                request.setPublicId(publicId);
+                rsrc = resolve(request);
             }
         }
 
-        if (rsrc == null) {
-            rsrc = resolver.resolveNamespace(namespace, resId.getBaseSystemId(), NATURE_XML_SCHEMA, PURPOSE_SCHEMA_VALIDATION);
+        if (rsrc == null || !rsrc.isResolved()) {
+            request = getRequest(namespace, resId.getBaseSystemId(), ResolverConstants.NATURE_XML_SCHEMA, ResolverConstants.PURPOSE_SCHEMA_VALIDATION);
+            rsrc = resolve(request);
         }
 
-        if (rsrc == null) {
+        if (rsrc == null || !rsrc.isResolved()) {
             rsrc = safeOpenConnection(systemId, baseURI, true);
         }
 
-        return rsrc == null ? null : new SAXInputSource(new ResolverInputSource(rsrc));
+        SAXInputSource source = null;
+        if (rsrc != null && rsrc.isResolved()) {
+            source = new SAXInputSource(new ResolverInputSource(rsrc));
+        }
+
+        return source;
     }
 
     private ResolvedResource safeOpenConnection(String systemId, String baseURI, boolean asEntity) {
         // This is "safe" in the weird sense that it doesn't throw a checked exception
         if (systemId != null && config.getFeature(ResolverFeature.ALWAYS_RESOLVE)) {
             try {
-                return openConnection(systemId, baseURI, asEntity);
+                return openConnection(systemId, baseURI, asEntity, true);
             } catch (IOException err) {
                 // What am I supposed to do about this now?
             }
@@ -132,25 +143,45 @@ public class XercesResolver extends Resolver implements org.apache.xerces.xni.pa
     }
 
     private XMLInputSource resolveDTD(XMLDTDDescription resId) {
-        ResolvedResource rsrc = resolver.resolveEntity(resId.getRootName(), resId.getPublicId(), resId.getLiteralSystemId(), resId.getBaseSystemId());
-        if (rsrc == null) {
-            rsrc = resolver.resolveEntity(resId.getRootName(), resId.getPublicId(), resId.getExpandedSystemId(), resId.getBaseSystemId());
+        ResourceRequest request = getRequest(resId.getLiteralSystemId(), resId.getBaseSystemId(),
+                ResolverConstants.DTD_NATURE, ResolverConstants.VALIDATION_PURPOSE);
+        request.setEntityName(resId.getRootName());
+        request.setPublicId(resId.getPublicId());
+        ResolvedResource rsrc = resolve(request);
+        if (!rsrc.isResolved()) {
+            request = getRequest(resId.getExpandedSystemId(), resId.getBaseSystemId(),
+                    ResolverConstants.DTD_NATURE, ResolverConstants.VALIDATION_PURPOSE);
+            request.setEntityName(resId.getRootName());
+            request.setPublicId(resId.getPublicId());
+            rsrc = resolve(request);
         }
-        if (rsrc == null) {
+        if (!rsrc.isResolved()) {
             rsrc = safeOpenConnection(resId.getLiteralSystemId(), resId.getBaseSystemId(), true);
         }
-        return rsrc == null ? null : new SAXInputSource(new ResolverInputSource(rsrc));
+        XMLInputSource source = null;
+        if (rsrc.isResolved()) {
+            source = new SAXInputSource(new ResolverInputSource(rsrc));
+        }
+        return source;
     }
 
     private XMLInputSource resolveEntity(XMLEntityDescription resId) {
         String name = resId.getEntityName();
         if (name.startsWith("%") || name.startsWith("&")) {
-            // Oh, please. The [expletive].
+            // Oh, please. The [expletive]?
             name = name.substring(1);
         }
-        ResolvedResource rsrc = resolver.resolveEntity(name, resId.getPublicId(), resId.getLiteralSystemId(), resId.getBaseSystemId());
-        if (rsrc == null) {
-            rsrc = resolver.resolveEntity(name, resId.getPublicId(), resId.getExpandedSystemId(), resId.getBaseSystemId());
+        ResourceRequest request = getRequest(resId.getLiteralSystemId(), resId.getBaseSystemId(),
+                ResolverConstants.EXTERNAL_ENTITY_NATURE, ResolverConstants.ANY_PURPOSE);
+        request.setEntityName(name);
+        request.setPublicId(resId.getPublicId());
+        ResolvedResource rsrc = resolve(request);
+        if (!rsrc.isResolved()) {
+            request = getRequest(resId.getExpandedSystemId(), resId.getBaseSystemId(),
+                    ResolverConstants.EXTERNAL_ENTITY_NATURE, ResolverConstants.ANY_PURPOSE);
+            request.setEntityName(name);
+            request.setPublicId(resId.getPublicId());
+            rsrc = resolve(request);
         }
         if (rsrc == null) {
             rsrc = safeOpenConnection(resId.getLiteralSystemId(), resId.getBaseSystemId(), true);
@@ -159,24 +190,26 @@ public class XercesResolver extends Resolver implements org.apache.xerces.xni.pa
     }
 
     private XMLInputSource resolveSchema(XSDDescription resId) {
+        ResourceRequest request = null;
         ResolvedResource rsrc = null;
 
         if (resId.getLiteralSystemId() != null) {
             // If there's a "system identifier" then there's either been a schema location
             // hint of some sort or this is an xsd:include. Try to resolve the URI.
-            rsrc = resolver.resolveURI(resId.getLiteralSystemId(), resId.getBaseSystemId());
+            request = getRequest(resId.getLiteralSystemId(), resId.getBaseSystemId());
         } else {
             // We don't want to do namespace resolution if there was a hint because
             // that would take us "back to the top" if some xs:include or xs:import
             // was 404.
-            rsrc = resolver.resolveNamespace(resId.getNamespace(), resId.getBaseSystemId(), NATURE_XML_SCHEMA, PURPOSE_SCHEMA_VALIDATION);
+            request = getRequest(resId.getNamespace(), resId.getBaseSystemId(), ResolverConstants.NATURE_XML_SCHEMA, ResolverConstants.PURPOSE_SCHEMA_VALIDATION);
         }
+        rsrc = resolve(request);
 
-        if (rsrc == null) {
+        if (!rsrc.isResolved()) {
             rsrc = safeOpenConnection(resId.getLiteralSystemId(), resId.getBaseSystemId(), false);
         }
 
-        if (rsrc != null) {
+        if (rsrc.isResolved()) {
             InputSource source = new ResolverInputSource(rsrc);
             source.setSystemId(rsrc.getLocalURI().toString());
             return new SAXInputSource(source);

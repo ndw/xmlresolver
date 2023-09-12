@@ -16,15 +16,6 @@ public class ResolvedResourceImpl extends ResolvedResource {
     private final Map<String, List<String>> headers;
     private final int statusCode;
 
-    public ResolvedResourceImpl(URI resolvedURI, URI localURI, InputStream stream, String contentType) {
-        this.resolvedURI = resolvedURI;
-        this.localURI = localURI;
-        this.inputStream = stream;
-        this.contentType = contentType;
-        this.headers = Collections.emptyMap();
-        this.statusCode = 200;
-    }
-
     public ResolvedResourceImpl(URI resolvedURI, URI localURI, InputStream stream, int status, Map<String,List<String>> headers) {
         this.resolvedURI = resolvedURI;
         this.localURI = localURI;
@@ -39,6 +30,11 @@ public class ResolvedResourceImpl extends ResolvedResource {
         }
         this.contentType = ctype;
         this.statusCode = status;
+    }
+
+    @Override
+    public ResourceRequest getRequest() {
+        throw new RuntimeException("getRequest not implemented");
     }
 
     @Override
@@ -74,4 +70,9 @@ public class ResolvedResourceImpl extends ResolvedResource {
     public String getHeader(String headerName) {
         return RsrcUtils.getHeader(headerName, headers);
     }
+
+    public String getEncoding() {
+        throw new RuntimeException("getRequest not implemented");
+    }
+
 }

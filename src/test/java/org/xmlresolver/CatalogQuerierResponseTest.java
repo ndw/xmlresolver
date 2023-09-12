@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-public class CatalogLookupTest {
+public class CatalogQuerierResponseTest {
     public static final String catalog1 = "src/test/resources/lookup1.xml";
     public static final String catalog2 = "src/test/resources/lookup2.xml";
     public static final URI catloc = URIUtils.cwd().resolve(catalog1);

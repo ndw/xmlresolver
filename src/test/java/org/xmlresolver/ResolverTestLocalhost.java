@@ -33,9 +33,6 @@ public class ResolverTestLocalhost extends CacheManager {
     @Before
     public void setup() {
         config = new XMLResolverConfiguration("src/test/resources/domresolver.xml");
-        config.setFeature(ResolverFeature.CACHE_DIRECTORY, null);
-        config.setFeature(ResolverFeature.CACHE_UNDER_HOME, false);
-        config.setFeature(ResolverFeature.CACHE_ENABLED, false);
         config.setFeature(ResolverFeature.ALWAYS_RESOLVE, false);
 
         // Make sure the Docker container is running where we expect.

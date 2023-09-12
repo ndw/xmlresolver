@@ -3,7 +3,6 @@ package org.xmlresolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xmlresolver.cache.ResourceCache;
 import org.xmlresolver.logging.AbstractLogger;
 import org.xmlresolver.logging.DefaultLogger;
 import org.xmlresolver.logging.ResolverLogger;
@@ -72,21 +71,6 @@ import java.util.function.Supplier;
  * <tr><th>{@link ResolverFeature#ARCHIVED_CATALOGS}</th>
  * <td>xml.catalog.archivedCatalogs</td>
  * <td>archived-catalogs</td>
- * <td>Boolean¹</td>
- * </tr>
- * <tr><th>{@link ResolverFeature#CACHE_DIRECTORY}</th>
- * <td>xml.catalog.cache</td>
- * <td>cache</td>
- * <td>String</td>
- * </tr>
- * <tr><th>{@link ResolverFeature#CACHE_UNDER_HOME}</th>
- * <td>xml.catalog.cacheUnderHome</td>
- * <td>cache-under-home</td>
- * <td>Boolean¹</td>
- * </tr>
- * <tr><th>{@link ResolverFeature#CACHE_ENABLED}</th>
- * <td>xml.catalog.cacheEnabled</td>
- * <td>cache-enabled</td>
  * <td>Boolean¹</td>
  * </tr>
  * <tr><th>{@link ResolverFeature#CATALOG_ADDITIONS}</th>
@@ -180,9 +164,7 @@ public class XMLResolverConfiguration implements ResolverConfiguration {
     private static final ResolverFeature<?>[] knownFeatures = { ResolverFeature.CATALOG_FILES,
             ResolverFeature.PREFER_PUBLIC, ResolverFeature.PREFER_PROPERTY_FILE,
             ResolverFeature.ALLOW_CATALOG_PI, ResolverFeature.ALWAYS_RESOLVE, ResolverFeature.CATALOG_ADDITIONS,
-            ResolverFeature.CACHE_DIRECTORY, ResolverFeature.CACHE_UNDER_HOME,
-            ResolverFeature.CACHE_ENABLED,
-            ResolverFeature.CACHE, ResolverFeature.MERGE_HTTPS, ResolverFeature.MASK_JAR_URIS,
+            ResolverFeature.MERGE_HTTPS, ResolverFeature.MASK_JAR_URIS,
             ResolverFeature.CATALOG_MANAGER, ResolverFeature.URI_FOR_SYSTEM,
             ResolverFeature.CATALOG_LOADER_CLASS, ResolverFeature.PARSE_RDDL,
             ResolverFeature.CLASSPATH_CATALOGS, ResolverFeature.CLASSLOADER,
@@ -201,10 +183,6 @@ public class XMLResolverConfiguration implements ResolverConfiguration {
     private Boolean preferPropertyFile = ResolverFeature.PREFER_PROPERTY_FILE.getDefaultValue();
     private Boolean allowCatalogPI = ResolverFeature.ALLOW_CATALOG_PI.getDefaultValue();
     private Boolean alwaysResolve = ResolverFeature.ALWAYS_RESOLVE.getDefaultValue();
-    private String cacheDirectory = ResolverFeature.CACHE_DIRECTORY.getDefaultValue();
-    private Boolean cacheUnderHome = ResolverFeature.CACHE_UNDER_HOME.getDefaultValue();
-    private Boolean cacheEnabled = ResolverFeature.CACHE_ENABLED.getDefaultValue();
-    private ResourceCache cache = ResolverFeature.CACHE.getDefaultValue(); // null
     private CatalogManager manager = ResolverFeature.CATALOG_MANAGER.getDefaultValue(); // also null
     private Boolean uriForSystem = ResolverFeature.URI_FOR_SYSTEM.getDefaultValue();
     private Boolean mergeHttps = ResolverFeature.MERGE_HTTPS.getDefaultValue();
@@ -311,10 +289,6 @@ public class XMLResolverConfiguration implements ResolverConfiguration {
         preferPropertyFile = current.preferPropertyFile;
         allowCatalogPI = current.allowCatalogPI;
         alwaysResolve = current.alwaysResolve;
-        cacheDirectory = current.cacheDirectory;
-        cacheUnderHome = current.cacheUnderHome;
-        cache = current.cache;
-        cacheEnabled = current.cacheEnabled;
         if (current.manager == null) {
             manager = null;
         } else {
@@ -450,7 +424,7 @@ public class XMLResolverConfiguration implements ResolverConfiguration {
             catalogs.clear();
             while (tokens.hasMoreTokens()) {
                 String token = tokens.nextToken();
-                if (!"".equals(token.trim())) {
+                if (!token.trim().isEmpty()) {
                     showConfigChange("Catalog: %s", token);
                     catalogs.add(token);
                 }
@@ -462,7 +436,7 @@ public class XMLResolverConfiguration implements ResolverConfiguration {
             StringTokenizer tokens = new StringTokenizer(property, ";");
             while (tokens.hasMoreTokens()) {
                 String token = tokens.nextToken();
-                if (!"".equals(token.trim())) {
+                if (!token.trim().isEmpty()) {
                     showConfigChange("Catalog: %s", token);
                     catalogs.add(token);
                 }
@@ -491,24 +465,6 @@ public class XMLResolverConfiguration implements ResolverConfiguration {
         if (property != null) {
             showConfigChange("Always resolve: %s", property);
             alwaysResolve = isTrue(property);
-        }
-
-        property = getConfigProperty("xml.catalog.cache");
-        if (property != null) {
-            showConfigChange("Cache directory: %s", property);
-            cacheDirectory = property;
-        }
-
-        property = getConfigProperty("xml.catalog.cacheUnderHome");
-        if (property != null) {
-            showConfigChange("Cache under home: %s", property);
-            cacheUnderHome = isTrue(property);
-        }
-
-        property = getConfigProperty("xml.catalog.cacheEnabled");
-        if (property != null) {
-            showConfigChange("Cache enabled: %s", property);
-            cacheEnabled = isTrue(property);
         }
 
         property = getConfigProperty("xml.catalog.uriForSystem");
@@ -617,7 +573,7 @@ public class XMLResolverConfiguration implements ResolverConfiguration {
             showConfigChange("Catalog list cleared");
             while (tokens.hasMoreTokens()) {
                 String token = tokens.nextToken();
-                if (!"".equals(token.trim())) {
+                if (!token.trim().isEmpty()) {
                     if (relative && propertiesURL != null) {
                         try {
                             token = new URL(propertiesURL, token).toString();
@@ -672,27 +628,6 @@ public class XMLResolverConfiguration implements ResolverConfiguration {
         if (property != null) {
             showConfigChange("Always resolve: %s", property);
             alwaysResolve = isTrue(property);
-        }
-
-        property = properties.getProperty("cache");
-        if (property != null) {
-            showConfigChange("Cache directory: %s", property);
-            cacheDirectory = property;
-        }
-
-        property = properties.getProperty("cache-under-home");
-        if (property == null) {
-            property = properties.getProperty("cacheUnderHome");
-        }
-        if (property != null) {
-            showConfigChange("Cache under home: %s", property);
-            cacheUnderHome = isTrue(property);
-        }
-
-        property = properties.getProperty("cache-enabled");
-        if (property != null) {
-            showConfigChange("Cache enabled: %s", property);
-            cacheEnabled = isTrue(property);
         }
 
         property = properties.getProperty("uri-for-system");
@@ -790,9 +725,6 @@ public class XMLResolverConfiguration implements ResolverConfiguration {
         resolverLogger.log(AbstractLogger.CONFIG, "URI for system: %s", uriForSystem);
         resolverLogger.log(AbstractLogger.CONFIG, "Merge http/https: %s", mergeHttps);
         resolverLogger.log(AbstractLogger.CONFIG, "Mask jar URIs: %s", maskJarUris);
-        resolverLogger.log(AbstractLogger.CONFIG, "Cache under home: %s", cacheUnderHome);
-        resolverLogger.log(AbstractLogger.CONFIG, "Cache directory: %s", cacheDirectory);
-        resolverLogger.log(AbstractLogger.CONFIG, "Cache enabled: %s", cacheEnabled);
         resolverLogger.log(AbstractLogger.CONFIG, "Catalog loader: %s", catalogLoader);
         resolverLogger.log(AbstractLogger.CONFIG, "Classpath catalogs: %s", classpathCatalogs);
         resolverLogger.log(AbstractLogger.CONFIG, "Archived catalogs: %s", archivedCatalogs);
@@ -888,7 +820,7 @@ public class XMLResolverConfiguration implements ResolverConfiguration {
                 catalogs.clear();
                 if (value != null) {
                     for (String cat : (List<String>) value) {
-                        if (!"".equals(cat.trim()) && !catalogs.contains(cat.trim())) {
+                        if (!cat.trim().isEmpty() && !catalogs.contains(cat.trim())) {
                             showConfigChange("Catalog: %s", cat.trim());
                             catalogs.add(cat.trim());
                         }
@@ -902,7 +834,7 @@ public class XMLResolverConfiguration implements ResolverConfiguration {
                         additionalCatalogs.clear();
                     } else {
                         for (String cat : (List<String>) value) {
-                            if (!"".equals(cat.trim()) && !additionalCatalogs.contains(cat.trim())) {
+                            if (!cat.trim().isEmpty() && !additionalCatalogs.contains(cat.trim())) {
                                 showConfigChange("Catalog: %s", cat.trim());
                                 additionalCatalogs.add(cat.trim());
                             }
@@ -916,19 +848,6 @@ public class XMLResolverConfiguration implements ResolverConfiguration {
                 classLoader = getClass().getClassLoader();
             }
             showConfigChange("Catalog loader: %s", classLoader);
-            return;
-        } else if (feature == ResolverFeature.CACHE_DIRECTORY) {
-            cacheDirectory = (String) value;
-            showConfigChange("Cache directory: %s", cacheDirectory);
-            if (cache == null) {
-                cache = new ResourceCache(this);
-            } else {
-                cache.reset();
-            }
-            return;
-        } else if (feature == ResolverFeature.CACHE) {
-            cache = (ResourceCache) value;
-            showConfigChange("Cache: %s", cache);
             return;
         }
 
@@ -948,22 +867,6 @@ public class XMLResolverConfiguration implements ResolverConfiguration {
         } else if (feature == ResolverFeature.ALWAYS_RESOLVE) {
             alwaysResolve = (Boolean) value;
             showConfigChange("Always resolve: %s", alwaysResolve);
-        } else if (feature == ResolverFeature.CACHE_UNDER_HOME) {
-            cacheUnderHome = (Boolean) value;
-            showConfigChange("Cache under home: %s", cacheUnderHome);
-            if (cache == null) {
-                cache = new ResourceCache(this);
-            } else {
-                cache.reset();
-            }
-        } else if (feature == ResolverFeature.CACHE_ENABLED) {
-            cacheEnabled = (Boolean) value;
-            showConfigChange("Cache enabled: %s", cacheEnabled);
-            if (cache == null) {
-                cache = new ResourceCache(this);
-            } else {
-                cache.reset();
-            }
         } else if (feature == ResolverFeature.CATALOG_MANAGER) {
             manager = (CatalogManager) value;
             resolverLogger.log(AbstractLogger.CONFIG, "Catalog manager: %s", manager.toString());
@@ -1167,8 +1070,6 @@ public class XMLResolverConfiguration implements ResolverConfiguration {
             return (T) allowCatalogPI;
         } else if (feature == ResolverFeature.ALWAYS_RESOLVE) {
             return (T) alwaysResolve;
-        } else if (feature == ResolverFeature.CACHE_DIRECTORY) {
-            return (T) cacheDirectory;
         } else if (feature == ResolverFeature.URI_FOR_SYSTEM) {
             return (T) uriForSystem;
         } else if (feature == ResolverFeature.MERGE_HTTPS) {
@@ -1181,15 +1082,6 @@ public class XMLResolverConfiguration implements ResolverConfiguration {
             return (T) parseRddl;
         } else if (feature == ResolverFeature.CLASSPATH_CATALOGS) {
             return (T) classpathCatalogs;
-        } else if (feature == ResolverFeature.CACHE) {
-            if (cache == null) {
-                cache = new ResourceCache(this);
-            }
-            return (T) cache;
-        } else if (feature == ResolverFeature.CACHE_UNDER_HOME) {
-            return (T) cacheUnderHome;
-        } else if (feature == ResolverFeature.CACHE_ENABLED) {
-            return (T) cacheEnabled;
         } else if (feature == ResolverFeature.CLASSLOADER) {
             return (T) classLoader;
         } else if (feature == ResolverFeature.ARCHIVED_CATALOGS) {

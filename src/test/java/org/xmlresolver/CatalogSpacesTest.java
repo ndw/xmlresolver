@@ -21,9 +21,6 @@ public class CatalogSpacesTest {
     @Before
     public void setup() {
         config = new XMLResolverConfiguration(catalog);
-        config.setFeature(ResolverFeature.CACHE_DIRECTORY, null);
-        config.setFeature(ResolverFeature.CACHE_UNDER_HOME, false);
-        config.setFeature(ResolverFeature.CACHE_ENABLED, false);
         resolver = new Resolver(config);
 
         // Make sure the Docker container is running where we expect.

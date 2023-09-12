@@ -54,7 +54,13 @@ import java.util.Map;
  * can continue with all of the URIs resolved locally.</p>
  */
 
-public abstract class ResolvedResource implements ResolverResourceInfo {
+public abstract class ResolvedResource {
+    public abstract ResourceRequest getRequest();
+
+    public boolean isResolved() {
+        return false;
+    }
+
     /** The resolved URI.
      *
      * <p>This is the URI that should be reported as the resolved URI.</p>
@@ -112,4 +118,7 @@ public abstract class ResolvedResource implements ResolverResourceInfo {
     public Map<String, List<String>> getHeaders() {
         return Collections.emptyMap();
     }
+
+    public abstract String getHeader(String name);
+    public abstract String getEncoding();
 }

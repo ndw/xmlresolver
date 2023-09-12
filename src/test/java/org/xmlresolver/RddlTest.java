@@ -9,10 +9,7 @@ import org.xmlresolver.utils.URIUtils;
 import java.io.File;
 import java.net.URI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class RddlTest extends CacheManager {
     public static final String catalog = "src/test/resources/docker.xml";
@@ -34,7 +31,6 @@ public class RddlTest extends CacheManager {
     public void setup() {
         config = new XMLResolverConfiguration(catalog);
         File cache = new File(URIUtils.cwd().getPath() + relativeCacheDir);
-        config.setFeature(ResolverFeature.CACHE_DIRECTORY, cache.getAbsolutePath());
         resolver = new CatalogResolver(config);
 
         // Make sure the Docker container is running where we expect.
@@ -58,8 +54,7 @@ public class RddlTest extends CacheManager {
                 null,
                 "http://www.isi.edu/in-notes/iana/assignments/media-types/application/xml-dtd",
                 "http://www.rddl.org/purposes#validation");
-
-        assertNotNull(dtd);
+        assertTrue(dtd.isResolved());
         assertEquals("application/xml-dtd", dtd.getContentType());
     }
 
@@ -70,7 +65,7 @@ public class RddlTest extends CacheManager {
                 null,
                 "http://www.w3.org/2001/XMLSchema",
                 "http://www.rddl.org/purposes#schema-validation");
-        assertNotNull(xsd);
+        assertTrue(xsd.isResolved());
         assertEquals("application/xml", xsd.getContentType());
     }
 
@@ -81,7 +76,7 @@ public class RddlTest extends CacheManager {
                 null,
                 "http://www.w3.org/1999/XSL/Transform",
                 "http://www.rddl.org/purposes#transformation");
-        assertNotNull(xsl);
+        assertTrue(xsl.isResolved());
         assertEquals("application/xml", xsl.getContentType());
     }
 
@@ -92,28 +87,46 @@ public class RddlTest extends CacheManager {
                 "http://localhost:8222/docs/",
                 "http://www.w3.org/1999/XSL/Transform",
                 "http://www.rddl.org/purposes#transformation");
-        assertNotNull(xsl);
+        assertTrue(xsl.isResolved());
         assertEquals("application/xml", xsl.getContentType());
     }
 
     @Test
     public void xsdTestNoRddl() {
         resolver.getConfiguration().setFeature(ResolverFeature.PARSE_RDDL, false);
+        resolver.getConfiguration().setFeature(ResolverFeature.ALWAYS_RESOLVE, true);
         ResolvedResource xsd = resolver.resolveNamespace("http://localhost:8222/docs/sample",
                 null,
                 "http://www.w3.org/2001/XMLSchema",
                 "http://www.rddl.org/purposes#schema-validation");
-        assertNull(xsd);
+        assertTrue(xsd.isResolved());
+        assertEquals("http://localhost:8222/docs/sample", xsd.getResolvedURI().toString());
+
+        resolver.getConfiguration().setFeature(ResolverFeature.ALWAYS_RESOLVE, false);
+        xsd = resolver.resolveNamespace("http://localhost:8222/docs/sample",
+                null,
+                "http://www.w3.org/2001/XMLSchema",
+                "http://www.rddl.org/purposes#schema-validation");
+        assertFalse(xsd.isResolved());
     }
 
     @Test
     public void xslTestNoRddl() {
         resolver.getConfiguration().setFeature(ResolverFeature.PARSE_RDDL, false);
+        resolver.getConfiguration().setFeature(ResolverFeature.ALWAYS_RESOLVE, true);
         ResolvedResource xsl = resolver.resolveNamespace("http://localhost:8222/docs/sample",
                 null,
                 "http://www.w3.org/1999/XSL/Transform",
                 "http://www.rddl.org/purposes#transformation");
-        assertNull(xsl);
+        assertTrue(xsl.isResolved());
+        assertEquals("http://localhost:8222/docs/sample", xsl.getResolvedURI().toString());
+
+        resolver.getConfiguration().setFeature(ResolverFeature.ALWAYS_RESOLVE, false);
+        xsl = resolver.resolveNamespace("http://localhost:8222/docs/sample",
+                null,
+                "http://www.w3.org/1999/XSL/Transform",
+                "http://www.rddl.org/purposes#transformation");
+        assertFalse(xsl.isResolved());
     }
 
     @Ignore
@@ -125,7 +138,7 @@ public class RddlTest extends CacheManager {
                 null,
                 "http://www.w3.org/2001/XMLSchema",
                 "http://www.rddl.org/purposes#schema-validation");
-        assertNull(xsd);
+        assertFalse(xsd.isResolved());
     }
 
     @Test
@@ -133,9 +146,6 @@ public class RddlTest extends CacheManager {
         // This test gets the xml.xsd file from the catalog, so it runs quickly and proves
         // that we parse the resolved resource, not the original URI.
         XMLResolverConfiguration config = new XMLResolverConfiguration("src/test/resources/catalog.xml");
-        config.setFeature(ResolverFeature.CACHE_DIRECTORY, null);
-        config.setFeature(ResolverFeature.CACHE_UNDER_HOME, false);
-        config.setFeature(ResolverFeature.CACHE_ENABLED, false);
         config.setFeature(ResolverFeature.PARSE_RDDL, true);
         CatalogResolver resolver = new CatalogResolver(config);
 
@@ -143,7 +153,7 @@ public class RddlTest extends CacheManager {
                 null,
                 "http://www.w3.org/2001/XMLSchema",
                 "http://www.rddl.org/purposes#schema-validation");
-        assertNotNull(xsd);
+        assertTrue(xsd.isResolved());
         assertTrue(xsd.getResolvedURI().toString().endsWith("/xml.xsd"));
     }
 }

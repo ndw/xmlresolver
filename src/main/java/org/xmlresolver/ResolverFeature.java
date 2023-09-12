@@ -1,9 +1,7 @@
 package org.xmlresolver;
 
-import com.thaiopensource.resolver.xml.sax.SAX;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xmlresolver.cache.ResourceCache;
 import org.xmlresolver.logging.ResolverLogger;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -123,32 +121,6 @@ public class ResolverFeature<T> {
             "http://xmlresolver.org/feature/always-resolve", true);
 
     /**
-     * Sets the location of the cache directory.
-     *
-     * <p>If the value
-     * is <code>null</code>, and <code>CACHE_UNDER_HOME</code> is <code>false</code>, no cache will
-     * be used.</p>
-     */
-    public static final ResolverFeature<String> CACHE_DIRECTORY = new ResolverFeature<>(
-            "http://xmlresolver.org/feature/cache-directory", (String) null);
-
-    /**
-     * Determines if a default cache location of <code>.xmlresolver.org/cache</code>
-     * under the users home directory should be used for the cache.
-     *
-     * <p>This only applies if <code>CATALOG_CACHE</code>
-     * is <code>null</code>.</p>
-     */
-    public static final ResolverFeature<Boolean> CACHE_UNDER_HOME = new ResolverFeature<>(
-            "http://xmlresolver.org/feature/cache-under-home", true);
-
-    /**
-     * Provides access to the {@link ResourceCache} that the resolver is using.
-     */
-    public static final ResolverFeature<ResourceCache> CACHE = new ResolverFeature<>(
-            "http://xmlresolver.org/feature/cache", (ResourceCache) null);
-
-    /**
      * Provides access to the {@link CatalogManager} that
      * the resolver is  using.
      */
@@ -156,7 +128,7 @@ public class ResolverFeature<T> {
             "http://xmlresolver.org/feature/catalog-manager", (CatalogManager) null);
 
     /**
-     * Determines whether or not <code>uri</code> catalog entries
+     * Determines whether <code>uri</code> catalog entries
      * can be used to resolve external identifiers.
      *
      * <p>This only applies if resolution fails through
@@ -366,14 +338,6 @@ public class ResolverFeature<T> {
      */
     public static final ResolverFeature<String> ACCESS_EXTERNAL_DOCUMENT = new ResolverFeature<>(
             "http://xmlresolver.org/feature/access-external-document", "all");
-
-    /**
-     * Is the cache enabled?
-     *
-     * <p>If the cache <em>is not</em> enabled, no attempt will be made to create or use a cache.</p>
-     */
-    public static final ResolverFeature<Boolean> CACHE_ENABLED = new ResolverFeature<>(
-            "http://xmlresolver.org/feature/cache-enabled", false);
 
     /**
      * Identify the SAXParserFactory class.

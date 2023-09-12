@@ -28,7 +28,7 @@ public abstract class URIUtils {
         return isWindows;
     }
 
-    private static String windowsPathURI(String uri) {
+    public static String windowsPathURI(String uri) {
         if (!isWindows()) {
             return uri;
         }

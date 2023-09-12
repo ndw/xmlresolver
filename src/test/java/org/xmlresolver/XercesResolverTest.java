@@ -40,10 +40,6 @@ public class XercesResolverTest {
     public void setup() {
         config = new XMLResolverConfiguration(Collections.emptyList(), Collections.singletonList(catalog1));
         config.setFeature(ResolverFeature.URI_FOR_SYSTEM, true);
-        config.setFeature(ResolverFeature.CACHE, null);
-        config.setFeature(ResolverFeature.CACHE_DIRECTORY, null);
-        config.setFeature(ResolverFeature.CACHE_UNDER_HOME, false);
-        config.setFeature(ResolverFeature.CACHE_ENABLED, false);
         resolver = new XercesResolver(config);
     }
 

@@ -114,15 +114,19 @@ public class ResolverTest {
         XMLResolverConfiguration rconfig = new XMLResolverConfiguration("src/test/resources/rescatxsd.xml");
         Resolver resolver = new Resolver(rconfig);
 
-        LSInput result = resolver.resolveResource(
-                "http://www.w3.org/2001/XMLSchema",
-                "http://xmlresolver.org/some/custom/namespace",
-                null,
-                null,
-                baseURI.toASCIIString()
-        );
+        try {
+            LSInput result = resolver.resolveResource(
+                    "http://www.w3.org/2001/XMLSchema",
+                    "http://xmlresolver.org/some/custom/namespace",
+                    null,
+                    null,
+                    baseURI.toASCIIString()
+            );
 
-        assertNull("null expected if schema resource is requested w/o systemId", result);
+            assertNull("null expected if schema resource is requested w/o systemId", result);
+        } catch (Exception ex) {
+            fail();
+        }
     }
 
     @Test

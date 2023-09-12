@@ -89,8 +89,6 @@ public class XmlLoader implements CatalogLoader {
             XMLResolverConfiguration config = new XMLResolverConfiguration(Collections.emptyList(), Collections.emptyList());
             config.setFeature(ResolverFeature.PREFER_PUBLIC, true);
             config.setFeature(ResolverFeature.CATALOG_FILES, Collections.singletonList("classpath:/org/xmlresolver/catalog.xml"));
-            config.setFeature(ResolverFeature.CACHE_DIRECTORY, null);
-            config.setFeature(ResolverFeature.CACHE_UNDER_HOME, false);
             config.setFeature(ResolverFeature.ALLOW_CATALOG_PI, false);
             config.setFeature(ResolverFeature.CLASSPATH_CATALOGS, false);
             loaderResolver = new Resolver(config);
