@@ -107,7 +107,7 @@ public class RddlTest extends CacheManager {
                 null,
                 "http://www.w3.org/2001/XMLSchema",
                 "http://www.rddl.org/purposes#schema-validation");
-        assertFalse(xsd.isResolved());
+        assertNull(xsd);
     }
 
     @Test
@@ -126,7 +126,7 @@ public class RddlTest extends CacheManager {
                 null,
                 "http://www.w3.org/1999/XSL/Transform",
                 "http://www.rddl.org/purposes#transformation");
-        assertFalse(xsl.isResolved());
+        assertNull(xsl);
     }
 
     @Ignore

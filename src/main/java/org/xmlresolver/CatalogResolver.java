@@ -29,13 +29,15 @@ public class CatalogResolver implements ResourceResolver {
     @Override
     public ResolvedResource resolveURI(String href, String baseURI) {
         ResourceRequest request = resolver.getRequest(href, baseURI);
-        return resolver.resolve(request);
+        ResolvedResource resp = resolver.resolve(request);
+        return resp.isResolved() ? resp : null; // backwards compatibility
     }
 
     @Override
     public ResolvedResource resolveNamespace(String uri, String baseURI, String nature, String purpose) {
         ResourceRequest request = resolver.getRequest(uri, baseURI, nature, purpose);
-        return resolver.resolve(request);
+        ResolvedResource resp = resolver.resolve(request);
+        return resp.isResolved() ? resp : null; // backwards compatibility
     }
 
     @Override
@@ -43,6 +45,7 @@ public class CatalogResolver implements ResourceResolver {
         ResourceRequest request = resolver.getRequest(systemId, baseURI, ResolverConstants.EXTERNAL_ENTITY_NATURE, ResolverConstants.ANY_PURPOSE);
         request.setEntityName(name);
         request.setPublicId(publicId);
-        return resolver.resolve(request);
+        ResolvedResource resp = resolver.resolve(request);
+        return resp.isResolved() ? resp : null; // backwards compatibility
     }
 }
