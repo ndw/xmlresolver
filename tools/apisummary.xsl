@@ -67,6 +67,11 @@
 <xsl:template match="d:constructor|d:method">
   <xsl:element name="{local-name(.)}">
     <xsl:copy-of select="@name"/>
+    <xsl:if test="not(self::d:constructor)">
+      <return>
+        <xsl:sequence select="(d:return/d:type/@fullname,d:return/d:type/@name)[1]/string()"/>
+      </return>
+    </xsl:if>
     <xsl:apply-templates select="d:parameter"/>
   </xsl:element>
 </xsl:template>
