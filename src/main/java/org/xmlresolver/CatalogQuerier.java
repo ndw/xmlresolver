@@ -139,7 +139,7 @@ public class CatalogQuerier {
                     resolved = catalog.lookupURI(absSystem.toString());
                 }
             } else {
-                resolved = catalog.lookupNamespaceURI(absSystem.toString(), request.getNature(), request.getPurpose());
+                resolved = catalog.lookupNamespaceURI(absSystem.toString(), nature, purpose);
             }
         }
 

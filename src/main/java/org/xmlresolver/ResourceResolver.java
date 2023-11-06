@@ -42,7 +42,7 @@ public interface ResourceResolver {
      * @param href The possibly relative URI to resolve.
      * @param base The possibly null base URI to use if href is relative and not resolved.
      * @param nature The possibly null nature URI.
-     * @param purpose The possilby null purpose URI.
+     * @param purpose The possibly null purpose URI.
      * @return The resolved resource, or null if resolution fails.
      */
     ResolvedResource resolveNamespace(String href, String base, String nature, String purpose);
