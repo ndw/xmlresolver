@@ -80,7 +80,8 @@ public class CatalogQuerierResponseTest {
     @Test
     public void lookupPublic_prefer_public_system_nopublic3() {
         // Catalog contains both a matching system entry and a matching public entry
-        URI result = manager.lookupPublic("https://example.com/sample/1.0/sample.dtd", null);
+        URI result = manager.lookupPublic("https://example.com/sample/1.0/sample.dtd",
+                "-//Sample//DTD Sample Prefer System 1.0//EN");
         assertEquals(catloc.resolve("sample10/sample-system.dtd"), result);
     }
 
