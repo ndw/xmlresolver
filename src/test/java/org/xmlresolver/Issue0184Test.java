@@ -35,6 +35,7 @@ public class Issue0184Test {
         try {
             ResolvingXMLReader reader = new ResolvingXMLReader(resolver);
             reader.getResolver().getConfiguration().setFeature(ResolverFeature.DEFAULT_LOGGER_LOG_LEVEL, "debug");
+            reader.getResolver().getConfiguration().setFeature(ResolverFeature.FIX_WINDOWS_SYSTEM_IDENTIFIERS, true);
             String filename = "src/test/iss0184/src/SBBVT0T-Deployment-Flat-mod.xml";
             InputSource source = new InputSource(filename);
             System.out.println("SOURCE: " + source);
