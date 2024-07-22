@@ -217,6 +217,13 @@ public class Resolver implements URIResolver, EntityResolver, EntityResolver2, N
     @Override
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
         System.err.println("RE2: " + " :: " + systemId);
+
+        try {
+            throw new RuntimeException("bang");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
         ResolvedResource rsrc = resolver.resolveEntity(null, publicId, systemId, null);
         if (rsrc == null) {
             if (systemId == null || !config.getFeature(ResolverFeature.ALWAYS_RESOLVE)) {

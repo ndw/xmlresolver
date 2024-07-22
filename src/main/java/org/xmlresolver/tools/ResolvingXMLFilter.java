@@ -136,6 +136,7 @@ public class ResolvingXMLFilter extends XMLFilterImpl {
      * to do the real work.
      */
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+        System.err.println("FRE: " + systemId);
         return resolver.resolveEntity(publicId, systemId);
     }
 
