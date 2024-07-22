@@ -54,7 +54,7 @@ jobs:
         run: |
           git submodule sync
           git submodule update --init
-          ./gradlew --stacktrace test
+          ./gradlew --stacktrace --info test
 
       - name: Publish release
         uses: softprops/action-gh-release@v1
