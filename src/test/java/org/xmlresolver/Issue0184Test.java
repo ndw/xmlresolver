@@ -39,6 +39,7 @@ public class Issue0184Test {
             InputSource source = new InputSource(filename);
             reader.parse(source);
         } catch (IOException | SAXException ex) {
+            ex.printStackTrace();
             fail();
         }
     }
