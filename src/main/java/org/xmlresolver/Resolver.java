@@ -253,9 +253,13 @@ public class Resolver implements URIResolver, EntityResolver, EntityResolver2, N
             }
         }
 
+        System.err.println("OPEN: " + uri);
+
         try {
             URI absuri = baseURI == null ? URIUtils.cwd() : new URI(baseURI);
+            System.err.println("BASE: " + absuri);
             absuri = absuri.resolve(uri);
+            System.err.println("ABS: " + absuri);
             return openConnection(absuri, asEntity);
         } catch (IllegalArgumentException ex) {
             if (config.getFeature(ResolverFeature.THROW_URI_EXCEPTIONS)) {
