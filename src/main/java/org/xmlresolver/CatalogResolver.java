@@ -211,6 +211,7 @@ public class CatalogResolver implements ResourceResolver {
      */
     @Override
     public ResolvedResource resolveEntity(String name, String publicId, String systemId, String baseURI) {
+        System.err.println("CR: " + systemId + " :: " + baseURI);
         if (name == null && publicId == null && systemId == null && baseURI == null) {
             logger.log(AbstractLogger.REQUEST, "resolveEntity: null");
             return null;

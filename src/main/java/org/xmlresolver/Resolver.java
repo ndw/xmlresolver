@@ -196,6 +196,7 @@ public class Resolver implements URIResolver, EntityResolver, EntityResolver2, N
     /** Implements the {@link org.xml.sax.ext.EntityResolver2} interface. */
     @Override
     public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
+        System.err.println("RE1: " + baseURI + " :: " + systemId);
         ResolvedResource rsrc = resolver.resolveEntity(name, publicId, systemId, baseURI);
         if (rsrc == null) {
             if (systemId == null || !config.getFeature(ResolverFeature.ALWAYS_RESOLVE)) {
@@ -215,6 +216,7 @@ public class Resolver implements URIResolver, EntityResolver, EntityResolver2, N
     /** Implements the {@link org.xml.sax.EntityResolver} interface. */
     @Override
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+        System.err.println("RE2: " + " :: " + systemId);
         ResolvedResource rsrc = resolver.resolveEntity(null, publicId, systemId, null);
         if (rsrc == null) {
             if (systemId == null || !config.getFeature(ResolverFeature.ALWAYS_RESOLVE)) {
