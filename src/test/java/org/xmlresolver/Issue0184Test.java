@@ -43,8 +43,7 @@ public class Issue0184Test {
         } catch (IOException | SAXException ex) {
             System.out.println("EXCEPT: " + ex);
             ex.printStackTrace();
-            System.out.println("STDOUT");
-            System.err.println("STDERR");
+            fail();
         }
     }
 
