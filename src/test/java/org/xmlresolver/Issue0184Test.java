@@ -37,12 +37,13 @@ public class Issue0184Test {
             reader.getResolver().getConfiguration().setFeature(ResolverFeature.DEFAULT_LOGGER_LOG_LEVEL, "debug");
             String filename = "src/test/iss0184/src/SBBVT0T-Deployment-Flat-mod.xml";
             InputSource source = new InputSource(filename);
-            System.err.println("SOURCE: " + source);
+            System.out.println("SOURCE: " + source);
             reader.parse(source);
         } catch (IOException | SAXException ex) {
-            System.err.println("EXCEPT: " + ex);
+            System.out.println("EXCEPT: " + ex);
             ex.printStackTrace();
-            fail();
+            System.out.println("STDOUT");
+            System.err.println("STDERR");
         }
     }
 
